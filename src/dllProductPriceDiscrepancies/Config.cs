@@ -3,12 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace dllProductPriceDiscrepancies
 {
     public class Config
     {
         public static Procedures hCntMain { get; set; } //осн. коннект
+        public static Procedures hCntMainKassRealizz { get; set; } //доп. коннект
+
+        public static Procedures hCntSecond { get; set; } //доп. коннект
+
+        public static Procedures hCntSecondKassRealizz { get; set; } //доп. коннект
+
+        public static void DoOnUIThread(MethodInvoker d, Form _this)
+        {
+            if (_this.InvokeRequired) { _this.Invoke(d); } else { d(); }
+        }
 
         public static string centralText(string str)
         {

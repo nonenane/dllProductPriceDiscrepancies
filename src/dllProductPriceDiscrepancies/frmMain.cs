@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Nwuram.Framework.Settings.Connection;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -13,10 +15,25 @@ namespace dllProductPriceDiscrepancies
     public partial class frmMain : Form
     {
         private DataTable dtDeps, dtGrp1, dtGrp2, dtData;
+        private bool isLoadData = false;
 
         public frmMain()
         {
             InitializeComponent();
+            dgvData.AutoGenerateColumns = false;
+
+            if (Config.hCntMain == null)
+                Config.hCntMain = new Procedures(ConnectionSettings.GetServer(), ConnectionSettings.GetDatabase(), ConnectionSettings.GetUsername(), ConnectionSettings.GetPassword(), ConnectionSettings.ProgramName);
+
+
+            if (Config.hCntMainKassRealizz == null)
+                Config.hCntMainKassRealizz = new Procedures(ConnectionSettings.GetServer("2"), ConnectionSettings.GetDatabase("2"), ConnectionSettings.GetUsername(), ConnectionSettings.GetPassword(), ConnectionSettings.ProgramName);
+
+            if (Config.hCntSecond == null)
+                Config.hCntSecond = new Procedures(ConnectionSettings.GetServer("3"), ConnectionSettings.GetDatabase("3"), ConnectionSettings.GetUsername(), ConnectionSettings.GetPassword(), ConnectionSettings.ProgramName);
+
+            if (Config.hCntSecondKassRealizz == null)
+                Config.hCntSecondKassRealizz = new Procedures(ConnectionSettings.GetServer("4"), ConnectionSettings.GetDatabase("4"), ConnectionSettings.GetUsername(), ConnectionSettings.GetPassword(), ConnectionSettings.ProgramName);
         }
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -91,13 +108,112 @@ namespace dllProductPriceDiscrepancies
             setFilter();
         }
 
-        private void getData()
+        private DateTime? dateStart, dateEnd;
+        private Nwuram.Framework.UI.Service.EnableControlsServiceInProg blockers = new Nwuram.Framework.UI.Service.EnableControlsServiceInProg();
+        private async void getData()
         {
-            //string ean = tbEan.Text.Trim().Length == 0 ? null : tbEan.Text.Trim().ToLower();
-            //string cName = tbName.Text.Trim().Length == 0 ? null : tbName.Text.Trim().ToLower();
-            //Task<DataTable> task = Config.hCntMain.getFindTovar(ean, cName, chbNewGoods.Checked);
-            //task.Wait();
-            //dtData = task.Result;
+            dgvData.DataSource = null;
+
+            if (isLoadData) return;
+
+            dateStart = null;
+            dateEnd = null;
+
+            if (chbPeriod.Checked)
+            {
+                dateStart = dtpStart.Value.Date;
+                dateEnd = dtpEnd.Value.Date;
+            }
+
+
+            blockers.SaveControlsEnabledState(this);
+            blockers.SetControlsEnabled(this, false);
+
+            var result = await Task<bool>.Factory.StartNew(() =>
+            {
+                isLoadData = true;
+                Config.DoOnUIThread(() =>
+                {
+                    toolStripProgressBar1.Visible = true;
+                }, this);
+                Task<DataTable> task = Config.hCntMain.getGoodsWithPromo(dateStart, dateEnd);
+                task.Wait();
+
+                dtData = task.Result;
+
+                if (dtData == null || dtData.Rows.Count == 0)
+                {
+                    Config.DoOnUIThread(() =>
+                    {
+                        toolStripProgressBar1.Visible = false;
+                        blockers.RestoreControlEnabledState(this);
+                    }, this);
+
+                    isLoadData = false;
+                    return false;
+                }
+
+                if (!dtData.Columns.Contains("priceK21"))
+                { dtData.Columns.Add(new DataColumn("priceK21", typeof(decimal)) { DefaultValue = 0.00 }); }
+
+                if (!dtData.Columns.Contains("priceX14"))
+                { dtData.Columns.Add(new DataColumn("priceX14", typeof(decimal)) { DefaultValue = 0.00 }); }
+
+                if (!dtData.Columns.Contains("delta"))
+                { dtData.Columns.Add(new DataColumn("delta", typeof(decimal)) { DefaultValue = 0.00 }); }
+
+                if (!dtData.Columns.Contains("cName"))
+                { dtData.Columns.Add(new DataColumn("cName", typeof(string)) { DefaultValue = "" }); }
+
+
+                DataTable dtGoods, dtGoodsX14;
+                task = Config.hCntMainKassRealizz.getGoodUpdates();
+                task.Wait();
+                dtGoods = task.Result;
+
+                task = Config.hCntSecondKassRealizz.getGoodUpdates();
+                task.Wait();
+
+                dtGoodsX14 = task.Result;
+
+                if (dtGoods != null && dtGoods.Rows.Count > 0)
+                {
+                    DataTable dtTmp = dtData.Clone();
+                    var query = (from g in dtData.AsEnumerable()
+                                 join k in dtGoods.AsEnumerable() on new { Q = g.Field<string>("ean") } equals new { Q = k.Field<string>("ean") } into t1
+                                 join x in dtGoodsX14.AsEnumerable() on new { Q = g.Field<string>("ean") } equals new { Q = x.Field<string>("ean") } into t2
+                                 from leftjoin1 in t1.DefaultIfEmpty()
+                                 from leftjoin2 in t2.DefaultIfEmpty()
+                                 select dtTmp.LoadDataRow(new object[]
+                                                  {
+                                                  g.Field<string>("ean"),
+                                                  g.Field<int>("id_otdel"),
+                                                  g.Field<int>("id_grp1"),
+                                                  g.Field<int>("id_grp2"),
+                                                  g.Field<int>("id_tovar"),
+                                                  g.Field<decimal>("rcena"),
+                                                  g.Field<bool>("isPromo"),
+                                                  g.Field<int>("ntypetovar"),
+                                                  g.Field<string>("nameDep"),
+                                                  leftjoin1 == null ? 0 : leftjoin1.Field<decimal>("price"),
+                                                  leftjoin2 == null ? 0 : leftjoin2.Field<decimal>("price"),
+                                                  Math.Abs((leftjoin1 == null ? (decimal)0 : leftjoin1.Field<decimal>("price")) - (leftjoin2 == null ? (decimal)0 : leftjoin2.Field<decimal>("price"))),
+                                                  leftjoin1 == null ? "" : leftjoin1.Field<string>("cName")
+
+                                                  }, false));
+
+
+                    dtData = query.Where(r => r.Field<decimal>("delta") != 0).CopyToDataTable();
+                }
+                isLoadData = false;
+                Config.DoOnUIThread(() =>
+                {
+                    toolStripProgressBar1.Visible = false;
+                    blockers.RestoreControlEnabledState(this);
+                }, this); 
+                return true;
+            });
+
             setFilter();
             dgvData.DataSource = dtData;
 
@@ -120,7 +236,7 @@ namespace dllProductPriceDiscrepancies
                     filter += (filter.Length == 0 ? "" : " and ") + $"ean like '%{tbEan.Text.Trim()}%'";
 
                 if (tbName.Text.Trim().Length != 0)
-                    filter += (filter.Length == 0 ? "" : " and ") + $"cname like '%{tbName.Text.Trim()}%'";
+                    filter += (filter.Length == 0 ? "" : " and ") + $"cName like '%{tbName.Text.Trim()}%'";
 
                 if ((int)cmbDeps.SelectedValue != 0)
                     filter += (filter.Length == 0 ? "" : " and ") + $"id_otdel  = {cmbDeps.SelectedValue}";
@@ -134,14 +250,18 @@ namespace dllProductPriceDiscrepancies
                 if (!chbReserv.Checked)
                     filter += (filter.Length == 0 ? "" : " and ") + $"ntypetovar not in (1,3)";
 
+                if (chbDiscount.Checked)
+                    filter += (filter.Length == 0 ? "" : " and ") + $"isPromo = 1";
+
                 //if (!chbReserv.Checked)
                 //  filter += (filter.Length == 0 ? "" : " and ") + $"isActive = 1";
 
                 dtData.DefaultView.RowFilter = filter;
+                dtData.DefaultView.Sort = "id_otdel asc, cName asc";
             }
             catch
             {
-                dtData.DefaultView.RowFilter = "id = -1";
+                dtData.DefaultView.RowFilter = "id_tovar = -1";
             }
             finally
             {
@@ -290,6 +410,7 @@ namespace dllProductPriceDiscrepancies
         private void chbPeriod_Click(object sender, EventArgs e)
         {
             dtpStart.Enabled = dtpEnd.Enabled = chbPeriod.Checked;
+            getData();
         }
 
         private void dtpStart_ValueChanged(object sender, EventArgs e)
@@ -339,9 +460,13 @@ namespace dllProductPriceDiscrepancies
                 Color rColor = Color.White;
                 if (new List<int>(new int[] { 1, 3 }).Contains((int)dtData.DefaultView[e.RowIndex]["ntypetovar"]))
                 {
-                    rColor = panel1.BackColor;
+                    rColor = pReserv.BackColor;
                 }
-
+                else
+                    if ((bool)dtData.DefaultView[e.RowIndex]["isPromo"])
+                {
+                    rColor = pPromo.BackColor;
+                }
                 dgvData.Rows[e.RowIndex].DefaultCellStyle.BackColor = rColor;
                 dgvData.Rows[e.RowIndex].DefaultCellStyle.SelectionBackColor = rColor;
                 dgvData.Rows[e.RowIndex].DefaultCellStyle.SelectionForeColor = Color.Black;

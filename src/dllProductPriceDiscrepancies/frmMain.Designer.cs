@@ -28,10 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.cmbGrp2 = new System.Windows.Forms.ComboBox();
@@ -42,7 +42,7 @@
             this.tbEan = new System.Windows.Forms.TextBox();
             this.tbName = new System.Windows.Forms.TextBox();
             this.btClose = new System.Windows.Forms.Button();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.pReserv = new System.Windows.Forms.Panel();
             this.chbReserv = new System.Windows.Forms.CheckBox();
             this.btUpdate = new System.Windows.Forms.Button();
             this.btPrint = new System.Windows.Forms.Button();
@@ -51,17 +51,19 @@
             this.label3 = new System.Windows.Forms.Label();
             this.dtpEnd = new System.Windows.Forms.DateTimePicker();
             this.chbPeriod = new System.Windows.Forms.CheckBox();
+            this.pPromo = new System.Windows.Forms.Panel();
+            this.chbDiscount = new System.Windows.Forms.CheckBox();
+            this.chbTabReport = new System.Windows.Forms.CheckBox();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.cDeps = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.cEan = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.cName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.cPriceK21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.cPriceX14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.cDelta = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.chbDiscount = new System.Windows.Forms.CheckBox();
-            this.chbTabReport = new System.Windows.Forms.CheckBox();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).BeginInit();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label5
@@ -130,14 +132,14 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvData.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvData.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle9.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            dataGridViewCellStyle9.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvData.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle9;
             this.dgvData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvData.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.cDeps,
@@ -177,6 +179,7 @@
             // btClose
             // 
             this.btClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btClose.Image = global::dllProductPriceDiscrepancies.Properties.Resources.exit_8633;
             this.btClose.Location = new System.Drawing.Point(908, 551);
             this.btClose.Name = "btClose";
             this.btClose.Size = new System.Drawing.Size(32, 32);
@@ -184,14 +187,14 @@
             this.btClose.UseVisualStyleBackColor = true;
             this.btClose.Click += new System.EventHandler(this.btClose_Click);
             // 
-            // panel1
+            // pReserv
             // 
-            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(231)))), ((int)(((byte)(255)))));
-            this.panel1.Location = new System.Drawing.Point(18, 546);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(17, 17);
-            this.panel1.TabIndex = 14;
+            this.pReserv.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.pReserv.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(231)))), ((int)(((byte)(255)))));
+            this.pReserv.Location = new System.Drawing.Point(18, 546);
+            this.pReserv.Name = "pReserv";
+            this.pReserv.Size = new System.Drawing.Size(17, 17);
+            this.pReserv.TabIndex = 14;
             // 
             // chbReserv
             // 
@@ -208,6 +211,7 @@
             // btUpdate
             // 
             this.btUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btUpdate.Image = global::dllProductPriceDiscrepancies.Properties.Resources.reload_8055;
             this.btUpdate.Location = new System.Drawing.Point(880, 12);
             this.btUpdate.Name = "btUpdate";
             this.btUpdate.Size = new System.Drawing.Size(59, 56);
@@ -218,6 +222,7 @@
             // btPrint
             // 
             this.btPrint.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btPrint.Image = global::dllProductPriceDiscrepancies.Properties.Resources.klpq_2511;
             this.btPrint.Location = new System.Drawing.Point(870, 551);
             this.btPrint.Name = "btPrint";
             this.btPrint.Size = new System.Drawing.Size(32, 32);
@@ -273,80 +278,14 @@
             this.chbPeriod.UseVisualStyleBackColor = true;
             this.chbPeriod.Click += new System.EventHandler(this.chbPeriod_Click);
             // 
-            // cDeps
+            // pPromo
             // 
-            this.cDeps.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.cDeps.DataPropertyName = "nameDep";
-            this.cDeps.HeaderText = "Отдел";
-            this.cDeps.MinimumWidth = 90;
-            this.cDeps.Name = "cDeps";
-            this.cDeps.ReadOnly = true;
-            this.cDeps.Width = 90;
-            // 
-            // cEan
-            // 
-            this.cEan.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.cEan.DataPropertyName = "ean";
-            this.cEan.HeaderText = "EAN";
-            this.cEan.MinimumWidth = 100;
-            this.cEan.Name = "cEan";
-            this.cEan.ReadOnly = true;
-            // 
-            // cName
-            // 
-            this.cName.DataPropertyName = "cname";
-            this.cName.HeaderText = "Наименование товара";
-            this.cName.Name = "cName";
-            this.cName.ReadOnly = true;
-            // 
-            // cPriceK21
-            // 
-            this.cPriceK21.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.cPriceK21.DataPropertyName = "rcena";
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle6.Format = "N2";
-            dataGridViewCellStyle6.NullValue = null;
-            this.cPriceK21.DefaultCellStyle = dataGridViewCellStyle6;
-            this.cPriceK21.HeaderText = "K21";
-            this.cPriceK21.MinimumWidth = 110;
-            this.cPriceK21.Name = "cPriceK21";
-            this.cPriceK21.ReadOnly = true;
-            this.cPriceK21.Width = 110;
-            // 
-            // cPriceX14
-            // 
-            this.cPriceX14.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle7.Format = "N2";
-            dataGridViewCellStyle7.NullValue = null;
-            this.cPriceX14.DefaultCellStyle = dataGridViewCellStyle7;
-            this.cPriceX14.HeaderText = "X14";
-            this.cPriceX14.MinimumWidth = 110;
-            this.cPriceX14.Name = "cPriceX14";
-            this.cPriceX14.ReadOnly = true;
-            this.cPriceX14.Width = 110;
-            // 
-            // cDelta
-            // 
-            this.cDelta.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle8.Format = "N2";
-            dataGridViewCellStyle8.NullValue = null;
-            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.cDelta.DefaultCellStyle = dataGridViewCellStyle8;
-            this.cDelta.HeaderText = "Разница  (по модулю)";
-            this.cDelta.MinimumWidth = 100;
-            this.cDelta.Name = "cDelta";
-            this.cDelta.ReadOnly = true;
-            // 
-            // panel2
-            // 
-            this.panel2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(153)))));
-            this.panel2.Location = new System.Drawing.Point(18, 569);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(17, 17);
-            this.panel2.TabIndex = 14;
+            this.pPromo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.pPromo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(153)))));
+            this.pPromo.Location = new System.Drawing.Point(18, 569);
+            this.pPromo.Name = "pPromo";
+            this.pPromo.Size = new System.Drawing.Size(17, 17);
+            this.pPromo.TabIndex = 14;
             // 
             // chbDiscount
             // 
@@ -373,12 +312,88 @@
             // 
             // statusStrip1
             // 
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripProgressBar1});
             this.statusStrip1.Location = new System.Drawing.Point(0, 598);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(951, 22);
             this.statusStrip1.SizingGrip = false;
             this.statusStrip1.TabIndex = 19;
             this.statusStrip1.Text = "statusStrip1";
+            // 
+            // cDeps
+            // 
+            this.cDeps.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.cDeps.DataPropertyName = "nameDep";
+            this.cDeps.HeaderText = "Отдел";
+            this.cDeps.MinimumWidth = 90;
+            this.cDeps.Name = "cDeps";
+            this.cDeps.ReadOnly = true;
+            this.cDeps.Width = 90;
+            // 
+            // cEan
+            // 
+            this.cEan.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.cEan.DataPropertyName = "ean";
+            this.cEan.HeaderText = "EAN";
+            this.cEan.MinimumWidth = 100;
+            this.cEan.Name = "cEan";
+            this.cEan.ReadOnly = true;
+            // 
+            // cName
+            // 
+            this.cName.DataPropertyName = "cName";
+            this.cName.HeaderText = "Наименование товара";
+            this.cName.Name = "cName";
+            this.cName.ReadOnly = true;
+            // 
+            // cPriceK21
+            // 
+            this.cPriceK21.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.cPriceK21.DataPropertyName = "priceK21";
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle10.Format = "N2";
+            dataGridViewCellStyle10.NullValue = null;
+            this.cPriceK21.DefaultCellStyle = dataGridViewCellStyle10;
+            this.cPriceK21.HeaderText = "K21";
+            this.cPriceK21.MinimumWidth = 110;
+            this.cPriceK21.Name = "cPriceK21";
+            this.cPriceK21.ReadOnly = true;
+            this.cPriceK21.Width = 110;
+            // 
+            // cPriceX14
+            // 
+            this.cPriceX14.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.cPriceX14.DataPropertyName = "priceX14";
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle11.Format = "N2";
+            dataGridViewCellStyle11.NullValue = null;
+            this.cPriceX14.DefaultCellStyle = dataGridViewCellStyle11;
+            this.cPriceX14.HeaderText = "X14";
+            this.cPriceX14.MinimumWidth = 110;
+            this.cPriceX14.Name = "cPriceX14";
+            this.cPriceX14.ReadOnly = true;
+            this.cPriceX14.Width = 110;
+            // 
+            // cDelta
+            // 
+            this.cDelta.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.cDelta.DataPropertyName = "delta";
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle12.Format = "N2";
+            dataGridViewCellStyle12.NullValue = null;
+            dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.cDelta.DefaultCellStyle = dataGridViewCellStyle12;
+            this.cDelta.HeaderText = "Разница  (по модулю)";
+            this.cDelta.MinimumWidth = 100;
+            this.cDelta.Name = "cDelta";
+            this.cDelta.ReadOnly = true;
+            // 
+            // toolStripProgressBar1
+            // 
+            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
+            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
+            this.toolStripProgressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             // 
             // frmMain
             // 
@@ -391,8 +406,8 @@
             this.Controls.Add(this.dtpEnd);
             this.Controls.Add(this.dtpStart);
             this.Controls.Add(this.btPrint);
-            this.Controls.Add(this.panel2);
-            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.pPromo);
+            this.Controls.Add(this.pReserv);
             this.Controls.Add(this.chbDiscount);
             this.Controls.Add(this.chbReserv);
             this.Controls.Add(this.btUpdate);
@@ -416,6 +431,8 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMain_FormClosing);
             this.Load += new System.EventHandler(this.frmMain_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).EndInit();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -433,7 +450,7 @@
         private System.Windows.Forms.TextBox tbEan;
         private System.Windows.Forms.TextBox tbName;
         private System.Windows.Forms.Button btClose;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel pReserv;
         private System.Windows.Forms.CheckBox chbReserv;
         private System.Windows.Forms.Button btUpdate;
         private System.Windows.Forms.Button btPrint;
@@ -442,16 +459,17 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.DateTimePicker dtpEnd;
         private System.Windows.Forms.CheckBox chbPeriod;
+        private System.Windows.Forms.Panel pPromo;
+        private System.Windows.Forms.CheckBox chbDiscount;
+        private System.Windows.Forms.CheckBox chbTabReport;
+        private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.DataGridViewTextBoxColumn cDeps;
         private System.Windows.Forms.DataGridViewTextBoxColumn cEan;
         private System.Windows.Forms.DataGridViewTextBoxColumn cName;
         private System.Windows.Forms.DataGridViewTextBoxColumn cPriceK21;
         private System.Windows.Forms.DataGridViewTextBoxColumn cPriceX14;
         private System.Windows.Forms.DataGridViewTextBoxColumn cDelta;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.CheckBox chbDiscount;
-        private System.Windows.Forms.CheckBox chbTabReport;
-        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
     }
 }
 

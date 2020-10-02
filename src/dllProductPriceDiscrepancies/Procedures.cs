@@ -33,10 +33,10 @@ namespace dllProductPriceDiscrepancies
                  new string[0] { },
                  new DbType[0] { }, ap);
 
-            if (dtResult == null || dtResult.Rows.Count == 0) 
+            if (dtResult == null || dtResult.Rows.Count == 0)
                 return DateTime.Now;
-            else 
-                return (DateTime)dtResult.Rows[0][0];           
+            else
+                return (DateTime)dtResult.Rows[0][0];
         }
 
         public async Task<DataTable> getDepartments(bool withAllDeps = false)
@@ -187,5 +187,26 @@ namespace dllProductPriceDiscrepancies
             return dtResult;
         }
 
+        public async Task<DataTable> getGoodsWithPromo(DateTime? dateStart, DateTime? dateEnd)
+        {
+            ap.Clear();
+            ap.Add(dateStart);
+            ap.Add(dateEnd);
+         
+            return executeProcedure("[Goods_Card_New].[getGoodsWithPromo]",
+                new string[2] { "@dateStart", "@dateEnd" },
+                new DbType[2] { DbType.Date, DbType.Date },
+                ap);
+        }
+
+        public async Task<DataTable> getGoodUpdates()
+        {
+            ap.Clear();
+
+            return executeProcedure("[Goods_Card_New].[getGoodUpdates]",
+                new string[0] {},
+                new DbType[0] {},
+                ap);
+        }
     }
 }
