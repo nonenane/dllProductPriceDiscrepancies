@@ -16,6 +16,9 @@ namespace dllProductPriceDiscrepancies
     {
         private DataTable dtDeps, dtGrp1, dtGrp2, dtData;
         private bool isLoadData = false;
+        private Nwuram.Framework.ToExcelNew.ExcelUnLoad report = null;
+        private DateTime? dateStart, dateEnd;
+        private Nwuram.Framework.UI.Service.EnableControlsServiceInProg blockers = new Nwuram.Framework.UI.Service.EnableControlsServiceInProg();
 
         public frmMain()
         {
@@ -34,6 +37,24 @@ namespace dllProductPriceDiscrepancies
 
             if (Config.hCntSecondKassRealizz == null)
                 Config.hCntSecondKassRealizz = new Procedures(ConnectionSettings.GetServer("4"), ConnectionSettings.GetDatabase("4"), ConnectionSettings.GetUsername(), ConnectionSettings.GetPassword(), ConnectionSettings.ProgramName);
+
+            tsLabel.Text = Nwuram.Framework.Settings.Connection.ConnectionSettings.GetServer() + " " +
+               Nwuram.Framework.Settings.Connection.ConnectionSettings.GetDatabase();
+
+            for (int i = 2; i <= 4; i++)
+            {
+                if (ConnectionSettings.GetServer($"{i}").Length > 0)
+                {
+                    tsLabel.Text += " | "+Nwuram.Framework.Settings.Connection.ConnectionSettings.GetServer($"{i}") + " " +
+                  Nwuram.Framework.Settings.Connection.ConnectionSettings.GetDatabase($"{i}");
+                }
+            }
+
+            ToolTip tp = new ToolTip();
+            tp.SetToolTip(btClose,"Выход");
+            tp.SetToolTip(btPrint, "Печать");
+            tp.SetToolTip(btUpdate, "Обновить");
+
         }
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -70,6 +91,7 @@ namespace dllProductPriceDiscrepancies
 
         private void cmbDeps_SelectionChangeCommitted(object sender, EventArgs e)
         {
+            chbTabReport.Enabled = cDeps.Visible = (int)cmbDeps.SelectedValue == 0;
             if (dtGrp1 != null)
             {
                 cmbGrp1.DataSource = dtGrp1.AsEnumerable()
@@ -106,10 +128,8 @@ namespace dllProductPriceDiscrepancies
         {
             cmbGrp1.SelectedIndex = 0;
             setFilter();
-        }
-
-        private DateTime? dateStart, dateEnd;
-        private Nwuram.Framework.UI.Service.EnableControlsServiceInProg blockers = new Nwuram.Framework.UI.Service.EnableControlsServiceInProg();
+        }        
+        
         private async void getData()
         {
             dgvData.DataSource = null;
@@ -204,6 +224,34 @@ namespace dllProductPriceDiscrepancies
 
 
                     dtData = query.Where(r => r.Field<decimal>("delta") != 0).CopyToDataTable();
+
+                    dtTmp.Clear();
+
+                    query = (from g in dtData.AsEnumerable().Where(r=>r.Field<bool>("isPromo"))
+                             join k in dtGoods.AsEnumerable() on new { Q = g.Field<string>("ean") } equals new { Q = k.Field<string>("ean") } into t1
+                             //join x in dtGoodsX14.AsEnumerable() on new { Q = g.Field<string>("ean") } equals new { Q = x.Field<string>("ean") } into t2
+                             from leftjoin1 in t1.DefaultIfEmpty()
+                             //from leftjoin2 in t2.DefaultIfEmpty()
+                             select dtTmp.LoadDataRow(new object[]
+                                              {
+                                                  g.Field<string>("ean"),
+                                                  g.Field<int>("id_otdel"),
+                                                  g.Field<int>("id_grp1"),
+                                                  g.Field<int>("id_grp2"),
+                                                  g.Field<int>("id_tovar"),
+                                                  g.Field<decimal>("rcena"),
+                                                  g.Field<bool>("isPromo"),
+                                                  g.Field<int>("ntypetovar"),
+                                                  g.Field<string>("nameDep"),
+                                                  g.Field<decimal>("rcena"),
+                                                  leftjoin1 == null ? 0 : leftjoin1.Field<decimal>("price"),
+                                                  //leftjoin2 == null ? 0 : leftjoin2.Field<decimal>("price"),
+                                                  Math.Abs(g.Field<decimal>("rcena") - (leftjoin1 == null ? (decimal)0 : leftjoin1.Field<decimal>("price"))),
+                                                  leftjoin1 == null ? "" : leftjoin1.Field<string>("cName")
+
+                                              }, false));
+
+                    dtData.Merge(query.Where(r => r.Field<decimal>("delta") != 0).CopyToDataTable());
                 }
                 isLoadData = false;
                 Config.DoOnUIThread(() =>
@@ -224,7 +272,7 @@ namespace dllProductPriceDiscrepancies
             if (dtData == null || dtData.Rows.Count == 0)
             {
                 //btEdit.Enabled = btDelete.Enabled = false;
-                //btPrint.Enabled = btViewCartGoods.Enabled = false;
+                btPrint.Enabled = false;
                 return;
             }
 
@@ -265,8 +313,8 @@ namespace dllProductPriceDiscrepancies
             }
             finally
             {
-                //btPrint.Enabled = btViewCartGoods.Enabled =
-                //dtData.DefaultView.Count != 0;
+                btPrint.Enabled =
+                dtData.DefaultView.Count != 0;
                 //dgvData_SelectionChanged(null, null);
             }
         }
@@ -278,7 +326,7 @@ namespace dllProductPriceDiscrepancies
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-
+            e.Cancel = MessageBox.Show(Config.centralText("Вы действительно хотите выйти\nиз программы?\n"), "Выход из программы", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.No;
         }
 
         private void btClose_Click(object sender, EventArgs e)
@@ -295,78 +343,143 @@ namespace dllProductPriceDiscrepancies
         {
             report.SetColumnWidth(indexRow, indexCol, indexRow, indexCol, width);
         }
-
-        private void btPrint_Click(object sender, EventArgs e)
+        
+        private async void btPrint_Click(object sender, EventArgs e)
         {
+            bool isTap = chbTabReport.Checked && chbTabReport.Enabled;
+            string nameDep = cmbDeps.Text;
+            
+            blockers.SaveControlsEnabledState(this);
+            blockers.SetControlsEnabled(this, false);
+            toolStripProgressBar1.Visible = true;
 
-            Nwuram.Framework.ToExcelNew.ExcelUnLoad report = new Nwuram.Framework.ToExcelNew.ExcelUnLoad();
+            var result = await Task<bool>.Factory.StartNew(() =>
+            {
+               report = null;// = new Nwuram.Framework.ToExcelNew.ExcelUnLoad();
 
+                if (isTap)
+                {
+                    foreach (DataRow row in (dtDeps.AsEnumerable().OrderByDescending(r => r.Field<int>("id"))))
+                    {
+                        if ((int)row["id"] == 0) continue;
+                        addTabExcel( (int)row["id"], (string)row["cName"]);
+                    }
+                }
+                else
+                {                   
+                    addTabExcel( 0, nameDep);
+                }
+
+                
+                Config.DoOnUIThread(() =>
+                {
+                    toolStripProgressBar1.Visible = false;
+                    blockers.RestoreControlEnabledState(this);
+                }, this);
+
+                report.Show();
+                return true;
+            });
+        }
+        
+        private void addTabExcel( int id_otdel,string nameDep)
+        {
             int indexRow = 1;
-
             int maxColumns = 0;
 
-            foreach (DataGridViewColumn col in dgvData.Columns)
-                if (col.Visible)
-                {
-                    maxColumns++;
-                    /*if (col.Name.Equals(cDeps.Name)) setWidthColumn(indexRow, maxColumns, 18, report);
-                    if (col.Name.Equals(cPost.Name)) setWidthColumn(indexRow, maxColumns, 18, report);
-                    if (col.Name.Equals(cFIO.Name)) setWidthColumn(indexRow, maxColumns, 20, report);
-                    if (col.Name.Equals(cPass.Name)) setWidthColumn(indexRow, maxColumns, 15, report);
-                    if (col.Name.Equals(cDatePrintPass.Name)) setWidthColumn(indexRow, maxColumns, 17, report);
-                    if (col.Name.Equals(cPhone.Name)) setWidthColumn(indexRow, maxColumns, 17, report);*/
-                }
+
+            DataTable dtReport = dtData.DefaultView.ToTable();
+
+            if (id_otdel != 0)
+            {
+                dtReport.DefaultView.RowFilter = $"id_otdel = {id_otdel}";
+            }
+
+            if (dtReport.DefaultView.Count == 0) return;
+
+            if (report == null)
+            {
+                report = new Nwuram.Framework.ToExcelNew.ExcelUnLoad();
+                report.changeNameTab($"{nameDep}");
+            }
+            else
+            {
+                report.GoToNextSheet($"{nameDep}");
+            }
+            Config.DoOnUIThread(() =>
+            {
+                foreach (DataGridViewColumn col in dgvData.Columns)
+                    if (col.Visible)
+                    {
+                        maxColumns++;
+                        if (col.Name.Equals(cDeps.Name)) setWidthColumn(indexRow, maxColumns, 18, report);
+                        if (col.Name.Equals(cEan.Name)) setWidthColumn(indexRow, maxColumns, 18, report);
+                        if (col.Name.Equals(cName.Name)) setWidthColumn(indexRow, maxColumns, 30, report);
+                        if (col.Name.Equals(cPriceK21.Name)) setWidthColumn(indexRow, maxColumns, 15, report);
+                        if (col.Name.Equals(cPriceX14.Name)) setWidthColumn(indexRow, maxColumns, 17, report);
+                        if (col.Name.Equals(cDelta.Name)) setWidthColumn(indexRow, maxColumns, 17, report);
+                    }
+            },this);
 
             #region "Head"
             report.Merge(indexRow, 1, indexRow, maxColumns);
-            report.AddSingleValue($"{this.Text}", indexRow, 1);
+            report.AddSingleValue($"Отчёт по расхождениям продажных цен по товарам", indexRow, 1);
             report.SetFontBold(indexRow, 1, indexRow, 1);
             report.SetFontSize(indexRow, 1, indexRow, 1, 16);
             report.SetCellAlignmentToCenter(indexRow, 1, indexRow, 1);
             indexRow++;
             indexRow++;
 
+            Config.DoOnUIThread(() =>
+            {
+                if (chbPeriod.Checked)
+                {
+                    report.Merge(indexRow, 1, indexRow, maxColumns);
+                    report.AddSingleValue($"Продажи с {dtpStart.Value.ToShortDateString()} по {dtpEnd.Value.ToShortDateString()}", indexRow, 1);
+                    indexRow++;
+                }
 
-            //report.Merge(indexRow, 1, indexRow, maxColumns);
-            //report.AddSingleValue($"Отдел: {cmbDeps.Text}", indexRow, 1);
-            //indexRow++;
+                report.Merge(indexRow, 1, indexRow, maxColumns);
+                report.AddSingleValue($"Отдел: {cmbDeps.Text}", indexRow, 1);
+                indexRow++;
 
-            //report.Merge(indexRow, 1, indexRow, maxColumns);
-            //report.AddSingleValue($"Должность: {cmbPost.Text}", indexRow, 1);
-            //indexRow++;
+                report.Merge(indexRow, 1, indexRow, maxColumns);
+                report.AddSingleValue($"Т/У группа: {cmbGrp1.Text}", indexRow, 1);
+                indexRow++;
 
-            //report.Merge(indexRow, 1, indexRow, maxColumns);
-            //report.AddSingleValue($"Место работы: {(rbOffice.Checked ? rbOffice.Text : rbUni.Text)}", indexRow, 1);
-            //indexRow++;
+                report.Merge(indexRow, 1, indexRow, maxColumns);
+                report.AddSingleValue($"Инв. группа: {cmbGrp2.Text}", indexRow, 1);
+                indexRow++;
 
-            //report.Merge(indexRow, 1, indexRow, maxColumns);
-            //report.AddSingleValue($"Статус сотрудника: {(rbWork.Checked ? rbWork.Text : rbUnemploy.Text)}", indexRow, 1);
-            //indexRow++;
+                if (tbEan.Text.Trim().Length != 0 || tbName.Text.Trim().Length != 0)
+                {
+                    report.Merge(indexRow, 1, indexRow, maxColumns);
+                    report.AddSingleValue($"Фильтр: {(tbEan.Text.Trim().Length != 0 ? $"EAN:{tbEan.Text.Trim()} | " : "")} {(tbName.Text.Trim().Length != 0 ? $"Наименование:{tbName.Text.Trim()}" : "")}", indexRow, 1);
+                    indexRow++;
+                }
 
-            //if (tbPostName.Text.Trim().Length != 0 || tbKadrName.Text.Trim().Length != 0)
-            //{
-            //    report.Merge(indexRow, 1, indexRow, maxColumns);
-            //    report.AddSingleValue($"Фильтр: {(tbPostName.Text.Trim().Length != 0 ? $"Должность:{tbPostName.Text.Trim()} | " : "")} {(tbKadrName.Text.Trim().Length != 0 ? $"ФИО:{tbKadrName.Text.Trim()}" : "")}", indexRow, 1);
-            //    indexRow++;
-            //}
+                report.Merge(indexRow, 1, indexRow, maxColumns);
+                report.AddSingleValue("Выгрузил: " + Nwuram.Framework.Settings.User.UserSettings.User.FullUsername, indexRow, 1);
+                indexRow++;
 
-            report.Merge(indexRow, 1, indexRow, maxColumns);
-            report.AddSingleValue("Выгрузил: " + Nwuram.Framework.Settings.User.UserSettings.User.FullUsername, indexRow, 1);
-            indexRow++;
-
-            report.Merge(indexRow, 1, indexRow, maxColumns);
-            report.AddSingleValue("Дата выгрузки: " + DateTime.Now.ToString(), indexRow, 1);
+                report.Merge(indexRow, 1, indexRow, maxColumns);
+                report.AddSingleValue("Дата выгрузки: " + DateTime.Now.ToString(), indexRow, 1);
+            },this);
             indexRow++;
             indexRow++;
             #endregion
 
             int indexCol = 0;
-            foreach (DataGridViewColumn col in dgvData.Columns)
-                if (col.Visible)
-                {
-                    indexCol++;
-                    report.AddSingleValue(col.HeaderText, indexRow, indexCol);
-                }
+
+            Config.DoOnUIThread(() =>
+            {
+                foreach (DataGridViewColumn col in dgvData.Columns)
+                    if (col.Visible)
+                    {
+                        indexCol++;
+                        report.AddSingleValue(col.HeaderText, indexRow, indexCol);
+                    }
+            },this);
             report.SetFontBold(indexRow, 1, indexRow, maxColumns);
             report.SetBorders(indexRow, 1, indexRow, maxColumns);
             report.SetCellAlignmentToCenter(indexRow, 1, indexRow, maxColumns);
@@ -374,7 +487,9 @@ namespace dllProductPriceDiscrepancies
             report.SetWrapText(indexRow, 1, indexRow, maxColumns);
             indexRow++;
 
-            foreach (DataRowView row in dtData.DefaultView)
+           
+
+            foreach (DataRowView row in dtReport.DefaultView)
             {
                 indexCol = 1;
                 report.SetWrapText(indexRow, indexCol, indexRow, maxColumns);
@@ -400,11 +515,30 @@ namespace dllProductPriceDiscrepancies
                 report.SetBorders(indexRow, 1, indexRow, maxColumns);
                 report.SetCellAlignmentToCenter(indexRow, 1, indexRow, maxColumns);
                 report.SetCellAlignmentToJustify(indexRow, 1, indexRow, maxColumns);
-
+                Config.DoOnUIThread(() =>
+                {
+                    if (new List<int>(new int[] { 1, 3 }).Contains((int)row["ntypetovar"]))
+                    {
+                        report.SetCellColor(indexRow, 1, indexRow, maxColumns, pReserv.BackColor);
+                    }
+                    else
+                   if ((bool)row["isPromo"])
+                    {
+                        report.SetCellColor(indexRow, 1, indexRow, maxColumns, pPromo.BackColor);
+                    }
+                }, this);
                 indexRow++;
             }
-            report.SetColumnAutoSize(6, 1, indexRow, maxColumns);
-            report.Show();
+            indexRow++;
+
+            report.SetCellColor(indexRow, 1, indexRow, 1, pPromo.BackColor);
+            report.Merge(indexRow, 2, indexRow, maxColumns);
+            report.AddSingleValue($"{chbDiscount.Text}", indexRow, 2);
+            indexRow++;
+
+            report.SetCellColor(indexRow, 1, indexRow, 1, pReserv.BackColor);
+            report.Merge(indexRow, 2, indexRow, maxColumns);
+            report.AddSingleValue($"{chbReserv.Text}", indexRow, 2);
         }
 
         private void chbPeriod_Click(object sender, EventArgs e)
@@ -472,7 +606,7 @@ namespace dllProductPriceDiscrepancies
                 dgvData.Rows[e.RowIndex].DefaultCellStyle.SelectionForeColor = Color.Black;
             }
         }
-
+        
         private void dgvData_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
             DataGridView dgv = sender as DataGridView;

@@ -39,6 +39,12 @@
             this.label2 = new System.Windows.Forms.Label();
             this.cmbDeps = new System.Windows.Forms.ComboBox();
             this.dgvData = new System.Windows.Forms.DataGridView();
+            this.cDeps = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cEan = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cPriceK21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cPriceX14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cDelta = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tbEan = new System.Windows.Forms.TextBox();
             this.tbName = new System.Windows.Forms.TextBox();
             this.btClose = new System.Windows.Forms.Button();
@@ -55,13 +61,8 @@
             this.chbDiscount = new System.Windows.Forms.CheckBox();
             this.chbTabReport = new System.Windows.Forms.CheckBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.cDeps = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.cEan = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.cName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.cPriceK21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.cPriceX14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.cDelta = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.tsLabel = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)(this.dgvData)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -160,6 +161,74 @@
             this.dgvData.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.dgvData_RowPostPaint);
             this.dgvData.RowPrePaint += new System.Windows.Forms.DataGridViewRowPrePaintEventHandler(this.dgvData_RowPrePaint);
             // 
+            // cDeps
+            // 
+            this.cDeps.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.cDeps.DataPropertyName = "nameDep";
+            this.cDeps.HeaderText = "Отдел";
+            this.cDeps.MinimumWidth = 90;
+            this.cDeps.Name = "cDeps";
+            this.cDeps.ReadOnly = true;
+            this.cDeps.Width = 90;
+            // 
+            // cEan
+            // 
+            this.cEan.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.cEan.DataPropertyName = "ean";
+            this.cEan.HeaderText = "EAN";
+            this.cEan.MinimumWidth = 100;
+            this.cEan.Name = "cEan";
+            this.cEan.ReadOnly = true;
+            // 
+            // cName
+            // 
+            this.cName.DataPropertyName = "cName";
+            this.cName.HeaderText = "Наименование товара";
+            this.cName.Name = "cName";
+            this.cName.ReadOnly = true;
+            // 
+            // cPriceK21
+            // 
+            this.cPriceK21.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.cPriceK21.DataPropertyName = "priceK21";
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle10.Format = "N2";
+            dataGridViewCellStyle10.NullValue = null;
+            this.cPriceK21.DefaultCellStyle = dataGridViewCellStyle10;
+            this.cPriceK21.HeaderText = "K21";
+            this.cPriceK21.MinimumWidth = 110;
+            this.cPriceK21.Name = "cPriceK21";
+            this.cPriceK21.ReadOnly = true;
+            this.cPriceK21.Width = 110;
+            // 
+            // cPriceX14
+            // 
+            this.cPriceX14.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.cPriceX14.DataPropertyName = "priceX14";
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle11.Format = "N2";
+            dataGridViewCellStyle11.NullValue = null;
+            this.cPriceX14.DefaultCellStyle = dataGridViewCellStyle11;
+            this.cPriceX14.HeaderText = "X14";
+            this.cPriceX14.MinimumWidth = 110;
+            this.cPriceX14.Name = "cPriceX14";
+            this.cPriceX14.ReadOnly = true;
+            this.cPriceX14.Width = 110;
+            // 
+            // cDelta
+            // 
+            this.cDelta.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.cDelta.DataPropertyName = "delta";
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle12.Format = "N2";
+            dataGridViewCellStyle12.NullValue = null;
+            dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.cDelta.DefaultCellStyle = dataGridViewCellStyle12;
+            this.cDelta.HeaderText = "Разница  (по модулю)";
+            this.cDelta.MinimumWidth = 100;
+            this.cDelta.Name = "cDelta";
+            this.cDelta.ReadOnly = true;
+            // 
             // tbEan
             // 
             this.tbEan.Location = new System.Drawing.Point(270, 70);
@@ -252,7 +321,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(188, 47);
+            this.label3.Location = new System.Drawing.Point(191, 47);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(19, 13);
             this.label3.TabIndex = 8;
@@ -262,7 +331,7 @@
             // 
             this.dtpEnd.Enabled = false;
             this.dtpEnd.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpEnd.Location = new System.Drawing.Point(204, 43);
+            this.dtpEnd.Location = new System.Drawing.Point(214, 43);
             this.dtpEnd.Name = "dtpEnd";
             this.dtpEnd.Size = new System.Drawing.Size(92, 20);
             this.dtpEnd.TabIndex = 16;
@@ -271,7 +340,7 @@
             // chbPeriod
             // 
             this.chbPeriod.AutoSize = true;
-            this.chbPeriod.Location = new System.Drawing.Point(302, 46);
+            this.chbPeriod.Location = new System.Drawing.Point(312, 46);
             this.chbPeriod.Name = "chbPeriod";
             this.chbPeriod.Size = new System.Drawing.Size(15, 14);
             this.chbPeriod.TabIndex = 17;
@@ -313,7 +382,9 @@
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsLabel,
             this.toolStripProgressBar1});
+            this.statusStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.statusStrip1.Location = new System.Drawing.Point(0, 598);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(951, 22);
@@ -321,79 +392,18 @@
             this.statusStrip1.TabIndex = 19;
             this.statusStrip1.Text = "statusStrip1";
             // 
-            // cDeps
-            // 
-            this.cDeps.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.cDeps.DataPropertyName = "nameDep";
-            this.cDeps.HeaderText = "Отдел";
-            this.cDeps.MinimumWidth = 90;
-            this.cDeps.Name = "cDeps";
-            this.cDeps.ReadOnly = true;
-            this.cDeps.Width = 90;
-            // 
-            // cEan
-            // 
-            this.cEan.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.cEan.DataPropertyName = "ean";
-            this.cEan.HeaderText = "EAN";
-            this.cEan.MinimumWidth = 100;
-            this.cEan.Name = "cEan";
-            this.cEan.ReadOnly = true;
-            // 
-            // cName
-            // 
-            this.cName.DataPropertyName = "cName";
-            this.cName.HeaderText = "Наименование товара";
-            this.cName.Name = "cName";
-            this.cName.ReadOnly = true;
-            // 
-            // cPriceK21
-            // 
-            this.cPriceK21.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.cPriceK21.DataPropertyName = "priceK21";
-            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle10.Format = "N2";
-            dataGridViewCellStyle10.NullValue = null;
-            this.cPriceK21.DefaultCellStyle = dataGridViewCellStyle10;
-            this.cPriceK21.HeaderText = "K21";
-            this.cPriceK21.MinimumWidth = 110;
-            this.cPriceK21.Name = "cPriceK21";
-            this.cPriceK21.ReadOnly = true;
-            this.cPriceK21.Width = 110;
-            // 
-            // cPriceX14
-            // 
-            this.cPriceX14.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.cPriceX14.DataPropertyName = "priceX14";
-            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle11.Format = "N2";
-            dataGridViewCellStyle11.NullValue = null;
-            this.cPriceX14.DefaultCellStyle = dataGridViewCellStyle11;
-            this.cPriceX14.HeaderText = "X14";
-            this.cPriceX14.MinimumWidth = 110;
-            this.cPriceX14.Name = "cPriceX14";
-            this.cPriceX14.ReadOnly = true;
-            this.cPriceX14.Width = 110;
-            // 
-            // cDelta
-            // 
-            this.cDelta.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.cDelta.DataPropertyName = "delta";
-            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle12.Format = "N2";
-            dataGridViewCellStyle12.NullValue = null;
-            dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.cDelta.DefaultCellStyle = dataGridViewCellStyle12;
-            this.cDelta.HeaderText = "Разница  (по модулю)";
-            this.cDelta.MinimumWidth = 100;
-            this.cDelta.Name = "cDelta";
-            this.cDelta.ReadOnly = true;
-            // 
             // toolStripProgressBar1
             // 
+            this.toolStripProgressBar1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
-            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
+            this.toolStripProgressBar1.Size = new System.Drawing.Size(200, 16);
             this.toolStripProgressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            // 
+            // tsLabel
+            // 
+            this.tsLabel.Name = "tsLabel";
+            this.tsLabel.Size = new System.Drawing.Size(109, 17);
+            this.tsLabel.Text = "toolStripStatusLabel1";
             // 
             // frmMain
             // 
@@ -470,6 +480,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn cPriceX14;
         private System.Windows.Forms.DataGridViewTextBoxColumn cDelta;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
+        private System.Windows.Forms.ToolStripStatusLabel tsLabel;
     }
 }
 
